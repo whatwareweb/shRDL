@@ -10,3 +10,9 @@ Cydia repo downloader/archiver written in Bash
 2nd y/n argument: whether or not to delete deburllist.txt file
 
 3rd y/n argument: whether or not to auto download all debs
+
+### Dependencies:
+- GNU core utils
+- bzip2
+- curl
+- wget
