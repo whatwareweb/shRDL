@@ -1,5 +1,5 @@
 # BashRDL
-Cydia repo downloader written in Bash
+Cydia repo downloader/archiver written in Bash
 
 
 ### Syntax:
