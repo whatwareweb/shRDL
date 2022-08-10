@@ -5,6 +5,9 @@
 # only for bash
 
 repoURL="$1"
+deletePackages="$2"
+deleteURLlist="$3"
+downloadDebs="$4"
 
 # check for correct syntax
 if [[ "$repoURL" == '-h' ]] || [[ "$repoURL" == '--help' ]]; then
@@ -72,16 +75,9 @@ if [[ "$repoURL" == */ ]]; then
   repoURL=$(echo ${repoURL::length-1})
 fi
 
-# debug
-echo "$repoURL"
-
 # check repo for correct packages filename
-responsegz=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L --silent --output /dev/null "$repoURL""/Packages.gz" )
-responsebz2=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L --silent --output /dev/null "$repoURL""/Packages.bz2" )
-
-# debug
-echo "$responsegz"
-echo "$responsebz2"
+responsegz=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L --silent --output /dev/null "$repoURL""/Packages.gz" )
+responsebz2=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L --silent --output /dev/null "$repoURL""/Packages.bz2" )
 
 # set archive type
 if [[ "$responsegz" == "200" ]]; then
@@ -105,9 +101,6 @@ if [[ "$responsegz" != "200" ]] && [[ "$responsebz2" != "200" ]]; then
   fi
 fi
 
-# debug
-echo "Using archive type ""$archive"
-
 # download archive
 curl -O -L "$repoURL""/Packages.""$archive"
 
@@ -125,9 +118,6 @@ if [[ "$repoURL" == "http://"* ]]; then
 elif [[ "$repoURL" == https://* ]]; then
   repoDomain=$(echo "$repoURL" | sed 's\https://\\')
 fi
-
-# debug
-echo "$repoDomain"
 
 # save all deb urls to file
 file=./Packages
@@ -151,12 +141,7 @@ while read -r line; do
 done <$file
 
 # file deletion / auto downloading
-deletePackages="$2"
-deleteURLlist="$3"
-downloadDebs="$4"
-
 echo
-
 if [[ "$deletePackages" != "y" ]] && [[ "$deletePackages" != "n" ]]; then
   echo "Delete Packages file? This file has dependencies, might be useful for archival."
   echo "[y/n]"
@@ -175,7 +160,7 @@ if [[ "$downloadDebs" != "y" ]] && [[ "$downloadDebs" != "n" ]]; then
   read downloadDebs
 fi
 if [[ $downloadDebs == y ]]; then
-  wget -P ./debs/ -i ./deburllist.txt
+  wget -q --show-progress --header "X-Machine: iPod4,1" --header "X-Unique-ID: 0000000000000000000000000000000000000000" --header "X-Firmware: 6.1" --header "User-Agent: Telesphoreo APT-HTTP/1.0.999" -P ./debs/ -i ./deburllist.txt
 fi
 
 echo "Cleaning up..."
