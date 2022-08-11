@@ -39,9 +39,11 @@ rm -f Packages.bz2
 rm -f Packages
 rm -f urllist.txt
 
-if [[ "$1" == */ ]]; then
-    set "${1::length-1}"
-fi
+case $1 in
+    */)
+        set "${1::length-1}"
+    ;;
+esac
 
 responsegz=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.gz" )
 responsebz2=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.bz2" )
