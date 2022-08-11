@@ -45,33 +45,33 @@ case $1 in
     ;;
 esac
 
-responsegz=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.gz" )
-responsebz2=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.bz2" )
+gzcode=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.gz" )
+bz2code=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.bz2" )
 
-if [[ "$responsegz" == "200" ]]; then
+if [ "$gzcode" -eq 200 ]; then
     printf "Downloading Packages.gz\n"
     archive=gz
-elif [[ "$responsebz2" == "200" ]]; then
+elif [ "$bz2code" -eq 200 ]; then
     printf "Downloading Packages.bz2\n"
     archive=bz2
 fi
 
-if [[ "$responsegz" != "200" ]] && [[ "$responsebz2" != "200" ]]; then
-    if [[ "$responsegz" == "404" ]] && [[ "$responsebz2" == "404" ]]; then
-        echo "No Packages file found. Exiting"
+if [ "$gzcode" -ne 200 ] && [ "$bz2code" -ne 200 ]; then
+    if [ "$gzcode" -eq 404 ] && [ "$bz2code" -eq 404 ]; then
+        printf "No Packages file found. Exiting\n"
         exit 1
     else
-        echo "Server returned ""$responsegz"" for Packages.gz and ""$responsebz2"" for Packages.bz2"
-        echo "Unknown error, exiting"
+        printf "Server returned %s for Packages.gz and %s for Packages.bz2" "$gzcode" "$bz2code"
+        printf "Unknown error, exiting\n"
         exit 1
     fi
 fi
 
 curl -# -O "$1""/Packages.""$archive"
 
-if [[ "$archive" == "gz" ]]; then
+if [ "$archive" = "gz" ]; then
     gunzip ./Packages.gz
-elif [[ "$archive" == "bz2" ]]; then
+elif [ "$archive" = "bz2" ]; then
     bunzip2 ./Packages.bz2
 fi
 
@@ -99,7 +99,7 @@ done < ./Packages
 [ ! -d debs ] && mkdir debs; cd debs || exit 1
 while read -r i; do
     printf "Downloading %s\n" "${i##*/}"
-    curl -# -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -O "$i"
+    curl -# -O "$i"
 done < ../urllist.txt
 cd ..
 
