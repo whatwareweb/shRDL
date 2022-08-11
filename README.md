@@ -5,6 +5,7 @@ Cydia repo downloader/archiver written in Bash
 ./shrdl.sh [repo url]
 
 ### Dependencies:
-- GNU coreutils
+- sed
 - bzip2
+- gzip
 - curl
