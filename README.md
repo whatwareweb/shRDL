@@ -1,4 +1,4 @@
-# BashRDL
+# shRDL
 Cydia repo downloader/archiver written in Bash
 
 ### Syntax:
