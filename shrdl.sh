@@ -24,13 +24,16 @@ EOF
 esac
 
 if ! command -v curl > /dev/null; then
-    echo "curl not found, please install curl"
+    printf "curl not found, please install curl\n"
     exit 1
 elif ! command -v gunzip > /dev/null; then
-    echo "gunzip not found, please install gunzip"
+    printf "gunzip not found, please install gunzip\n"
     exit 1
 elif ! command -v bunzip2 > /dev/null; then
-    echo "bunzip2 not found, please install bunzip2"
+    printf "bunzip2 not found, please install bunzip2\n"
+    exit 1
+elif ! command -v sed > /dev/null; then
+    printf "sed not found, please install sed\n"
     exit 1
 fi
 
@@ -103,4 +106,4 @@ while read -r i; do
 done < ../urllist.txt
 cd ..
 
-echo Done!
+printf "Done!\n"
