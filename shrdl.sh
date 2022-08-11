@@ -5,7 +5,7 @@ case $1 in
         exit 0
     ;;
 
-    http*)
+    http://*|https://*)
         true
     ;;
 
@@ -42,11 +42,7 @@ rm -f Packages.bz2
 rm -f Packages
 rm -f urllist.txt
 
-case $1 in
-    */)
-        set "${1::length-1}"
-    ;;
-esac
+set "${1%/}"
 
 gzcode=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.gz" )
 bz2code=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.bz2" )
@@ -57,17 +53,9 @@ if [ "$gzcode" -eq 200 ]; then
 elif [ "$bz2code" -eq 200 ]; then
     printf "Downloading Packages.bz2\n"
     archive=bz2
-fi
-
-if [ "$gzcode" -ne 200 ] && [ "$bz2code" -ne 200 ]; then
-    if [ "$gzcode" -eq 404 ] && [ "$bz2code" -eq 404 ]; then
-        printf "No Packages file found. Exiting\n"
-        exit 1
-    else
-        printf "Server returned %s for Packages.gz and %s for Packages.bz2" "$gzcode" "$bz2code"
-        printf "Unknown error, exiting\n"
-        exit 1
-    fi
+else
+    printf "Couldn't find a Packages file. Exiting\n"
+    exit 1
 fi
 
 curl -# -O "$1""/Packages.""$archive"
@@ -78,7 +66,7 @@ elif [ "$archive" = "bz2" ]; then
     bunzip2 ./Packages.bz2
 fi
 
-if [[ "$1" == "http://"* ]]; then
+if [[ "$1" == http://* ]]; then
     repoDomain=$(echo "$1" | sed 's\http://\\')
 elif [[ "$1" == https://* ]]; then
     repoDomain=$(echo "$1" | sed 's\https://\\')
