@@ -31,11 +31,6 @@ for cmd in curl gunzip bunzip2 sed; do
     fi
 done
 
-rm -f Packages.gz
-rm -f Packages.bz2
-rm -f Packages
-rm -f urllist.txt
-
 gzcode=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.gz" )
 bz2code=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.bz2" )
 
@@ -52,6 +47,7 @@ fi
 
 [ ! -d "$repodomain" ] && mkdir "$repodomain"
 cd "$repodomain" || exit 1
+rm -f urllist.txt
 
 curl -# -O "$1/Packages.$archive"
 
@@ -64,7 +60,7 @@ fi
 while read -r line; do
     if [[ "$line" == "Filename: "* ]]; then
         debURL=$(echo "$line" | sed 's\Filename: \\')
-        if [[ "$debURL" == "./"* ]]; then
+        if [[ "$debURL" == "./*" ]]; then
             remdotslash=$(echo "$debURL" | sed 's\./\\')
             echo "$1""/""$remdotslash" >> urllist.txt
         elif [[ "$debURL" != *"$repodomain"* ]]; then
