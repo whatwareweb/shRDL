@@ -26,7 +26,7 @@ esac
 
 for cmd in curl gunzip bunzip2 sed; do
     if ! command -v $cmd > /dev/null; then
-        echo "$cmd not found, please install $cmd"
+        printf "%s not found, please install %s\n" "$cmd" "$cmd"
         exit 1
     fi
 done
