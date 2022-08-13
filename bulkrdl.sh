@@ -11,7 +11,7 @@ fi
 
 while read -r line; do
     printf "Downloading repo: %s\n" "$line"
-    ./shrdl "$line"
+    ./shrdl.sh "$line"
 done < ./repolist.txt
 
 printf "Done!\n"

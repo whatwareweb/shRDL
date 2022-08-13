@@ -24,19 +24,12 @@ EOF
     ;;
 esac
 
-if ! command -v curl > /dev/null; then
-    printf "curl not found, please install curl\n"
-    exit 1
-elif ! command -v gunzip > /dev/null; then
-    printf "gunzip not found, please install gunzip\n"
-    exit 1
-elif ! command -v bunzip2 > /dev/null; then
-    printf "bunzip2 not found, please install bunzip2\n"
-    exit 1
-elif ! command -v sed > /dev/null; then
-    printf "sed not found, please install sed\n"
-    exit 1
-fi
+for cmd in curl gunzip bunzip2 sed; do
+    if ! command -v $cmd > /dev/null; then
+        echo "$cmd not found, please install $cmd"
+        exit 1
+    fi
+done
 
 rm -f Packages.gz
 rm -f Packages.bz2
@@ -87,7 +80,7 @@ cd debs || exit 1
 
 while read -r i; do
     printf "Downloading %s\n" "${i##*/}"
-    curl -# -O "$i"
+    curl -g -# -O "$i"
 done < ../urllist.txt
 cd ../..
 
