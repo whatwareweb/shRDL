@@ -30,44 +30,28 @@ if [[ "$repoURL" == '' ]] || [[ ! $repoURL =~ .*"http://".* ]] && [[ ! $repoURL 
 fi
 
 # check for dependencies
-if ! command -v curl &> /dev/null; then
-  echo "curl not found, please install curl"
-  exit 1
-fi
-if ! command -v wget &> /dev/null; then
-  echo "wget not found, please install wget"
-  exit 1
-fi
-if ! command -v gunzip &> /dev/null; then
-  echo "gunzip not found, please install gunzip"
-  exit 1
-fi
-if ! command -v bunzip2 &> /dev/null; then
-  echo "bunzip2 not found, please install bunzip2"
-  exit 1
-fi
+for cmd in curl wget gunzip bunzip2; do
+  if ! command -v $cmd &> /dev/null; then
+    echo "$cmd not found, please install $cmd"
+    exit 1
+  fi
+done
 
 # check for existing packages file, otherwise it will be overwritten
-if [ -f ./Packages.gz ] || [ -f ./Packages.bz2 ]; then
+if [ -f ./Packages.gz ] || [ -f ./Packages.bz2 ] || [ -f ./Packages ]; then
   echo "The packages archive already exists."
   echo "This could be caused by the script being interrupted/erroring last time."
   echo "Do you want to continue and overwrite the file? [y/n]"
   read overwrite
-fi
-if [ -f ./Packages ]; then
-  echo "The packages file already exists."
-  echo "This could be caused by the script being interrupted/erroring last time."
-  echo "Do you want to continue and overwrite the file? [y/n]"
-  read overwrite
-fi
-if [ -f ./Packages.gz ] || [ -f ./Packages.bz2 ] || [ -f ./Packages ] && [[ "$overwrite" == "y" ]]; then
-  echo "Overwriting Packages file."
-  rm ./Packages &> /dev/null
-  rm ./Packages.gz &> /dev/null
-  rm ./Packages.bz2 &> /dev/null
-elif [ -f ./Packages.gz ] || [ -f ./Packages.bz2 ] || [ -f ./Packages ]; then
-  echo "Packages file found and not being overwritten. Exiting."
-  exit 0
+  if [[ "$overwrite" == "y" ]]; then
+    echo "Overwriting Packages file."
+    rm ./Packages &> /dev/null
+    rm ./Packages.gz &> /dev/null
+    rm ./Packages.bz2 &> /dev/null
+  else
+    echo "Packages file found and not being overwritten. Exiting."
+    exit 0
+  fi
 fi
 
 # check for extra slash after repo name and remove
@@ -83,8 +67,7 @@ responsebz2=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 00000000000000000000
 if [[ "$responsegz" == "200" ]]; then
   echo "Success finding packages file"
   archive=gz
-fi
-if [[ "$responsebz2" == "200" ]]; then
+elif [[ "$responsebz2" == "200" ]]; then
   echo "Success finding packages file"
   archive=bz2
 fi
@@ -107,8 +90,7 @@ curl -O -L "$repoURL""/Packages.""$archive"
 # extract based on archive type
 if [[ "$archive" == "gz" ]]; then
   gunzip ./Packages.gz
-fi
-if [[ "$archive" == "bz2" ]]; then
+elif [[ "$archive" == "bz2" ]]; then
   bunzip2 ./Packages.bz2
 fi
 
