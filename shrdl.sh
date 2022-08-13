@@ -6,7 +6,8 @@ case $1 in
     ;;
 
     http://*|https://*)
-        true
+        set "${1%/}"
+        repodomain=${1#*//}
     ;;
 
     *)
@@ -42,8 +43,6 @@ rm -f Packages.bz2
 rm -f Packages
 rm -f urllist.txt
 
-set "${1%/}"
-
 gzcode=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.gz" )
 bz2code=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.bz2" )
 
@@ -58,18 +57,15 @@ else
     exit 1
 fi
 
-curl -# -O "$1""/Packages.""$archive"
+[ ! -d "$repodomain" ] && mkdir "$repodomain"
+cd "$repodomain" || exit 1
+
+curl -# -O "$1/Packages.$archive"
 
 if [ "$archive" = "gz" ]; then
     gunzip ./Packages.gz
 elif [ "$archive" = "bz2" ]; then
     bunzip2 ./Packages.bz2
-fi
-
-if [[ "$1" == http://* ]]; then
-    repoDomain=$(echo "$1" | sed 's\http://\\')
-elif [[ "$1" == https://* ]]; then
-    repoDomain=$(echo "$1" | sed 's\https://\\')
 fi
 
 while read -r line; do
@@ -78,20 +74,21 @@ while read -r line; do
         if [[ "$debURL" == "./"* ]]; then
             remdotslash=$(echo "$debURL" | sed 's\./\\')
             echo "$1""/""$remdotslash" >> urllist.txt
-        elif [[ "$debURL" != *"$repoDomain"* ]]; then
+        elif [[ "$debURL" != *"$repodomain"* ]]; then
             echo "$1""/""$debURL" >> urllist.txt
         else
             echo "$debURL" >> urllist.txt
-            echo "$debURL"" saved"
         fi
     fi
 done < ./Packages
 
-[ ! -d debs ] && mkdir debs; cd debs || exit 1
+[ ! -d debs ] && mkdir debs
+cd debs || exit 1
+
 while read -r i; do
     printf "Downloading %s\n" "${i##*/}"
     curl -# -O "$i"
 done < ../urllist.txt
-cd ..
+cd ../..
 
 printf "Done!\n"
