@@ -49,7 +49,7 @@ fi
 cd "$repodomain" || exit 1
 rm -f urllist.txt
 
-curl -# -O "$1/Packages.$archive"
+curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -L -# -O "$1/Packages.$archive"
 
 if [ "$archive" = "gz" ]; then
     gunzip ./Packages.gz
