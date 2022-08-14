@@ -45,7 +45,7 @@ else
     exit 1
 fi
 
-[ ! -d "$repodomain" ] && mkdir "$repodomain"
+[ ! -d "$repodomain" ] && mkdir -p "$repodomain"
 cd "$repodomain" || exit 1
 rm -f urllist.txt
 
