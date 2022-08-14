@@ -31,8 +31,8 @@ for cmd in curl gunzip bunzip2 sed; do
     fi
 done
 
-gzcode=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.gz" )
-bz2code=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1""/Packages.bz2" )
+gzcode=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1/Packages.gz" )
+bz2code=$(curl --write-out '%{http_code}' -L --silent --output /dev/null "$1/Packages.bz2" )
 
 if [ "$gzcode" -eq 200 ]; then
     printf "Downloading Packages.gz\n"
@@ -76,7 +76,7 @@ cd debs || exit 1
 
 while read -r i; do
     printf "Downloading %s\n" "${i##*/}"
-    curl -g -# -O "$i"
+    curl -g -L -# -O "$i"
 done < ../urllist.txt
 cd ../..
 
