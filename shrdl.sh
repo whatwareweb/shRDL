@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 case $1 in
     -v|--version)
         printf "shRDL 2.0\n"
@@ -58,17 +58,17 @@ elif [ "$archive" = "bz2" ]; then
 fi
 
 while read -r line; do
-    if [[ "$line" == "Filename: "* ]]; then
-        debURL=$(echo "$line" | sed 's\Filename: \\')
-        if [[ "$debURL" == "./*" ]]; then
-            remdotslash=$(echo "$debURL" | sed 's\./\\')
-            echo "$1""/""$remdotslash" >> urllist.txt
-        elif [[ "$debURL" != *"$repodomain"* ]]; then
-            echo "$1""/""$debURL" >> urllist.txt
-        else
-            echo "$debURL" >> urllist.txt
-        fi
-    fi
+    case $line in
+        Filename:*)
+            deburl=${line#Filename: }
+            case $deburl in
+                ./*)
+                    deburl=${deburl#./}
+                ;;
+            esac
+            printf "%s/%s\n" "$1" "$deburl" >> urllist.txt
+        ;;
+    esac
 done < ./Packages
 
 [ ! -d debs ] && mkdir debs
