@@ -24,9 +24,9 @@ EOF
     ;;
 esac
 
-for cmd in curl gunzip bunzip2 sed; do
-    if ! command -v $cmd > /dev/null; then
-        printf "%s not found, please install %s\n" "$cmd" "$cmd"
+for dep in curl gunzip bunzip2; do
+    if ! command -v $dep > /dev/null; then
+        printf "%s not found, please install %s\n" "$dep" "$dep"
         exit 1
     fi
 done
