@@ -1,7 +1,7 @@
 #!/bin/sh
 case $1 in
     -v|--version)
-        printf "shRDL 2.0\n"
+        printf "shRDL 2.1\n"
         exit 0
     ;;
 
