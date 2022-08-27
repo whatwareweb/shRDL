@@ -11,7 +11,7 @@ case $1 in
     ;;
 
     *)
-        cat <<EOF
+        cat << EOF
 shRDL - Downloads deb packages from Cydia repositories
 
 Usage:
