@@ -1,5 +1,5 @@
 # shRDL
-Cydia repo downloader/archiver written in Bash
+Cydia repo downloader/archiver written in POSIX shell
 
 ### Syntax:
 ./shrdl.sh [repo url]
