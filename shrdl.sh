@@ -31,8 +31,8 @@ for dep in curl gunzip bunzip2; do
   fi
 done
 
-gzcode=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L --silent --output /dev/null "$1/Packages.gz")
-bz2code=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L --silent --output /dev/null "$1/Packages.bz2")
+gzcode=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")
+bz2code=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")
 
 if [ "$gzcode" -eq 200 ]; then
   printf "Downloading Packages.gz\n"
