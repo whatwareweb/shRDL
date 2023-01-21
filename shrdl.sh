@@ -11,15 +11,13 @@ case $1 in
   ;;
 
   *)
-    cat << EOF
-shRDL - Downloads deb packages from Cydia repositories
+    printf "shRDL - Downloads deb packages from Cydia repositories
 
 Usage:
     shrdl.sh [URL]
 
     -h, --help          Print this message
-    -v, --version       Print version info
-EOF
+    -v, --version       Print version info\n"
     exit 0
   ;;
 esac
