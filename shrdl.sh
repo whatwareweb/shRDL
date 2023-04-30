@@ -22,10 +22,10 @@ for dep in curl gunzip bunzip2; do
     fi
 done
 
-if [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")" -eq 200 ]; then
-    archive=gz
-elif [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")" -eq 200 ]; then
+if [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")" -eq 200 ]; then
     archive=bz2
+elif [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")" -eq 200 ]; then
+    archive=gz
 else
     printf "Couldn't find a Packages file. Exiting\n"
     exit 1
@@ -39,10 +39,10 @@ rm -f urllist.txt
 
 curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -L -# -O "$1/Packages.$archive"
 
-if [ "$archive" = "gz" ]; then
-    gunzip ./Packages.gz
-elif [ "$archive" = "bz2" ]; then
+if [ "$archive" = "bz2" ]; then
     bunzip2 ./Packages.bz2
+elif [ "$archive" = "gz" ]; then
+    gunzip ./Packages.gz
 fi
 
 while read -r line; do
