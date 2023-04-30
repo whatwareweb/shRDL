@@ -1,47 +1,37 @@
 #!/bin/sh
 case $1 in
-  -v|--version)
-    printf "shRDL 2.2\n"
-    exit 0
-  ;;
+    -v|--version) printf "shRDL 2.3\n" && exit 0 ;;
 
-  http://*|https://*)
-    set "${1%/}"
-    repodomain=${1#*//}
-  ;;
+    http://*|https://*) set "${1%/}" && repodomain=${1#*//} ;;
 
-  *)
-    printf "shRDL - Downloads deb packages from Cydia repositories
+    *)
+        printf "shRDL - Downloads deb packages from Cydia repositories
 
-Usage:
-    shrdl.sh [URL]
+Usage: shrdl.sh <URL>
 
     -h, --help          Print this message
     -v, --version       Print version info\n"
-    exit 0
-  ;;
+        exit 0
+    ;;
 esac
 
 for dep in curl gunzip bunzip2; do
-  if ! command -v $dep > /dev/null; then
-    printf "%s not found, please install %s\n" "$dep" "$dep"
-    exit 1
-  fi
+    if ! command -v $dep > /dev/null; then
+        printf "%s not found, please install %s\n" "$dep" "$dep"
+        exit 1
+    fi
 done
 
-gzcode=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")
-bz2code=$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" --write-out '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")
-
-if [ "$gzcode" -eq 200 ]; then
-  printf "Downloading Packages.gz\n"
-  archive=gz
-elif [ "$bz2code" -eq 200 ]; then
-  printf "Downloading Packages.bz2\n"
-  archive=bz2
+if [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")" -eq 200 ]; then
+    archive=gz
+elif [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")" -eq 200 ]; then
+    archive=bz2
 else
-  printf "Couldn't find a Packages file. Exiting\n"
-  exit 1
+    printf "Couldn't find a Packages file. Exiting\n"
+    exit 1
 fi
+
+printf "Downloading Packages.%s\n" "$archive"
 
 [ ! -d "$repodomain" ] && mkdir -p "$repodomain"
 cd "$repodomain" || exit 1
@@ -50,31 +40,29 @@ rm -f urllist.txt
 curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -L -# -O "$1/Packages.$archive"
 
 if [ "$archive" = "gz" ]; then
-  gunzip ./Packages.gz
+    gunzip ./Packages.gz
 elif [ "$archive" = "bz2" ]; then
-  bunzip2 ./Packages.bz2
+    bunzip2 ./Packages.bz2
 fi
 
 while read -r line; do
-  case $line in
-    Filename:*)
-      deburl=${line#Filename: }
-      case $deburl in
-        ./*)
-          deburl=${deburl#./}
+    case $line in
+        Filename:*)
+            deburl=${line#Filename: }
+            case $deburl in
+                ./*) deburl=${deburl#./} ;;
+            esac
+            printf "%s/%s\n" "$1" "$deburl" >> urllist.txt
         ;;
-      esac
-      printf "%s/%s\n" "$1" "$deburl" >> urllist.txt
-    ;;
-  esac
+    esac
 done < ./Packages
 
 [ ! -d debs ] && mkdir debs
 cd debs || exit 1
 
 while read -r i; do
-  printf "Downloading %s\n" "${i##*/}"
-  curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -# -O "$i"
+    printf "Downloading %s\n" "${i##*/}"
+    curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -# -O "$i"
 done < ../urllist.txt
 cd ../..
 
