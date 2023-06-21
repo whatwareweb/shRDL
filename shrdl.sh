@@ -1,18 +1,7 @@
 #!/bin/sh
 case $1 in
-    -v|--version) printf "shRDL 2.3\n" && exit 0 ;;
-
     http://*|https://*) set "${1%/}" && repodomain=${1#*//} ;;
-
-    *)
-        printf "shRDL - Downloads deb packages from Cydia repositories
-
-Usage: shrdl.sh <URL>
-
-    -h, --help          Print this message
-    -v, --version       Print version info\n"
-        exit 0
-    ;;
+    *) printf "Usage: %s <repo url>\n" "${0##*/}" ; exit 0 ;;
 esac
 
 for dep in curl gunzip bunzip2; do
@@ -64,6 +53,5 @@ while read -r i; do
     printf "Downloading %s\n" "${i##*/}"
     curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -# -O "$i"
 done < ../urllist.txt
-cd ../..
 
 printf "Done!\n"
