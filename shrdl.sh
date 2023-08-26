@@ -4,7 +4,7 @@ case $1 in
     *) printf "Usage: %s <repo url>\n" "${0##*/}" ; exit 0 ;;
 esac
 
-for dep in curl gunzip bunzip2; do
+for dep in curl gzip bzip2; do
     if ! command -v $dep > /dev/null; then
         printf "%s not found, please install %s\n" "$dep" "$dep"
         exit 1
@@ -29,9 +29,9 @@ rm -f urllist.txt
 curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -L -# -O "$1/Packages.$archive"
 
 if [ "$archive" = "bz2" ]; then
-    bunzip2 ./Packages.bz2
+    bzip2 -d ./Packages.bz2
 elif [ "$archive" = "gz" ]; then
-    gunzip ./Packages.gz
+    gzip -d ./Packages.gz
 fi
 
 while read -r line; do
@@ -49,9 +49,25 @@ done < ./Packages
 [ ! -d debs ] && mkdir debs
 cd debs || exit 1
 
-while read -r i; do
-    printf "Downloading %s\n" "${i##*/}"
-    curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -# -O "$i"
-done < ../urllist.txt
+case "$*" in
+    *--single-threaded*) noparallel=1 ;;
+esac
 
+command -v pgrep > /dev/null || noparallel=1
+
+printf "Downloading debs\n"
+if [ "$noparallel" = "1" ]; then
+    while read -r i; do
+        curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -s -O "$i"
+    done < ../urllist.txt
+else
+    [ -z "$JOBS" ] && JOBS=16
+    while read -r i; do
+        while [ "$(pgrep -c curl)" -ge "$JOBS" ]; do
+            sleep 1
+        done
+        curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -s -O "$i" &
+    done < ../urllist.txt
+    wait
+fi
 printf "Done!\n"
