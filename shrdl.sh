@@ -1,7 +1,7 @@
 #!/bin/sh
 case $1 in
     http://*|https://*) set "${1%/}" && repodomain=${1#*//} ;;
-    *) printf "Usage: %s <repo url>\n" "${0##*/}" ; exit 0 ;;
+    *) printf "Usage: %s <repo url> [--single-threaded]\n" "${0##*/}" ; exit 0 ;;
 esac
 
 for dep in curl gzip bzip2; do
