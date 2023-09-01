@@ -1,7 +1,8 @@
 #!/bin/sh
+
 case $1 in
     http://*|https://*) set "${1%/}" && repodomain=${1#*//} ;;
-    *) printf "Usage: %s <repo url> [--single-threaded]\n" "${0##*/}" ; exit 0 ;;
+    *) printf "Usage: [SINGLETHREADED=1] %s <repo url>\n" "${0##*/}" ; exit 0 ;;
 esac
 
 for dep in curl gzip bzip2; do
@@ -50,14 +51,10 @@ done < ./Packages
 [ ! -d debs ] && mkdir debs
 cd debs || exit 1
 
-case "$*" in
-    *--single-threaded*) singlethread=1 ;;
-esac
-
-command -v pgrep > /dev/null || singlethread=1
+command -v pgrep > /dev/null || SINGLETHREADED=1
 
 printf "Downloading debs\n"
-if [ -z "$singlethread" ]; then
+if [ -n "$SINGLETHREADED" ]; then
     while read -r i; do
         curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -g -L -s -O "$i"
     done < ../urllist.txt
