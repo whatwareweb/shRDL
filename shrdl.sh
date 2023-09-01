@@ -11,9 +11,14 @@ for dep in curl gzip bzip2; do
     fi
 done
 
-if [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")" -eq 200 ]; then
+headers1="X-Machine: iPod4,1"
+headers2="X-Unique-ID: 0000000000000000000000000000000000000000"
+headers3="X-Firmware: 6.1"
+headers4="User-Agent: Telesphoreo APT-HTTP/1.0.999"
+
+if [ "$(curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")" -eq 200 ]; then
     archive=bz2
-elif [ "$(curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")" -eq 200 ]; then
+elif [ "$(curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")" -eq 200 ]; then
     archive=gz
 else
     printf "Couldn't find a Packages file. Exiting\n"
@@ -26,12 +31,12 @@ printf "Downloading Packages.%s\n" "$archive"
 cd "$repodomain" || exit 1
 rm -f urllist.txt
 
-curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -L -# -O "$1/Packages.$archive"
+curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -L -# -O "$1/Packages.$archive"
 
 if [ "$archive" = "bz2" ]; then
-    bzip2 -d ./Packages.bz2
+    bzip2 -df ./Packages.bz2
 elif [ "$archive" = "gz" ]; then
-    gzip -d ./Packages.gz
+    gzip -df ./Packages.gz
 fi
 
 while read -r line; do
@@ -58,7 +63,7 @@ command -v pgrep > /dev/null || noparallel=1
 printf "Downloading debs\n"
 if [ "$noparallel" = "1" ]; then
     while read -r i; do
-        curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -s -O "$i"
+        curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -g -L -s -O "$i"
     done < ../urllist.txt
 else
     [ -z "$JOBS" ] && JOBS=16
@@ -66,7 +71,7 @@ else
         while [ "$(pgrep -c curl)" -ge "$JOBS" ]; do
             sleep 1
         done
-        curl -H "X-Machine: iPod4,1" -H "X-Unique-ID: 0000000000000000000000000000000000000000" -H "X-Firmware: 6.1" -H "User-Agent: Telesphoreo APT-HTTP/1.0.999" -g -L -s -O "$i" &
+        curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -g -L -s -O "$i" &
     done < ../urllist.txt
     wait
 fi
