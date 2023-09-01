@@ -51,13 +51,13 @@ done < ./Packages
 cd debs || exit 1
 
 case "$*" in
-    *--single-threaded*) noparallel=1 ;;
+    *--single-threaded*) singlethread=1 ;;
 esac
 
-command -v pgrep > /dev/null || noparallel=1
+command -v pgrep > /dev/null || singlethread=1
 
 printf "Downloading debs\n"
-if [ -n "$noparallel" ]; then
+if [ -n "$singlethread" ]; then
     while read -r i; do
         curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -g -L -s -O "$i"
     done < ../urllist.txt
