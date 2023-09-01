@@ -65,7 +65,7 @@ else
     [ -z "$JOBS" ] && JOBS=16
     while read -r i; do
         while [ "$(pgrep -c curl)" -ge "$JOBS" ]; do
-            sleep 1
+            sleep 0.1
         done
         curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -g -L -s -O "$i" &
     done < ../urllist.txt
