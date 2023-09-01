@@ -16,28 +16,24 @@ headers2="X-Unique-ID: 0000000000000000000000000000000000000000"
 headers3="X-Firmware: 6.1"
 headers4="User-Agent: Telesphoreo APT-HTTP/1.0.999"
 
-if [ "$(curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.bz2")" -eq 200 ]; then
+[ -d "$repodomain" ] || mkdir -p "$repodomain"
+cd "$repodomain" || exit 1
+:> urllist.txt
+
+if [ "$(curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -w '%{http_code}' -L -s -o Packages.bz2 "$1/Packages.bz2")" -eq 200 ]; then
     archive=bz2
-elif [ "$(curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -w '%{http_code}' -L -s -o /dev/null "$1/Packages.gz")" -eq 200 ]; then
+    prog=bzip2
+elif [ "$(curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -w '%{http_code}' -L -s -o Packages.gz "$1/Packages.gz")" -eq 200 ]; then
     archive=gz
+    prog=gzip
+    rm Packages.bz2
 else
     printf "Couldn't find a Packages file. Exiting\n"
+    rm Packages.bz2 Packages.gz
     exit 1
 fi
 
-printf "Downloading Packages.%s\n" "$archive"
-
-[ ! -d "$repodomain" ] && mkdir -p "$repodomain"
-cd "$repodomain" || exit 1
-rm -f urllist.txt
-
-curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -L -# -O "$1/Packages.$archive"
-
-if [ "$archive" = "bz2" ]; then
-    bzip2 -df ./Packages.bz2
-elif [ "$archive" = "gz" ]; then
-    gzip -df ./Packages.gz
-fi
+$prog -df Packages.$archive
 
 while read -r line; do
     case $line in
