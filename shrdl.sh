@@ -57,7 +57,7 @@ esac
 command -v pgrep > /dev/null || singlethread=1
 
 printf "Downloading debs\n"
-if [ -n "$singlethread" ]; then
+if [ -z "$singlethread" ]; then
     while read -r i; do
         curl -H "$headers1" -H "$headers2" -H "$headers3" -H "$headers4" -g -L -s -O "$i"
     done < ../urllist.txt
