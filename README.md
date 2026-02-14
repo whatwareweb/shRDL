@@ -1,3 +1,6 @@
+# This project has been superceded by this fork: https://github.com/Un1q32/shRDL
+
+
 # shRDL
 Cydia repo downloader/archiver written in POSIX shell
 
